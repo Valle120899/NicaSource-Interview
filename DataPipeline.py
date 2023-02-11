@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[18]:
 
 
 #Importing libraries
@@ -10,6 +10,7 @@ import pandas as pd
 import warnings
 import psycopg2
 import sqlalchemy
+import argparse
 
 
 # In[2]:
@@ -97,11 +98,11 @@ def DoubletoInt(ds):
 
 def ExtractAndTransform():
     ds = pd.read_csv('dataset.csv')
-    #print(CommonInf('Initial dataset', ds))
+    print(CommonInf('Initial dataset', ds))
     
     #Validation for nan values
     ds = NanValues(ds)
-    #print(CommonInf('Dataset after null validation',ds))
+    print(CommonInf('Dataset after null validation',ds))
     
     #Validation for standart date format yyyy/mm/dd
     ds = dateFormat(ds)
@@ -115,7 +116,8 @@ def ExtractAndTransform():
     #Casting year column from double to int
     ds= DoubletoInt(ds)
     
-    #print(ds.head(5))
+    print('Dataframe to insert:')
+    print(ds.head(5))
     
     #return de final dataframe
     return ds
@@ -145,7 +147,7 @@ def CreatingTable(tableName, cursor):
 
 
 def InsertingData(df, tableName, engine):
-    # Escribir el dataframe a la base de datos
+    #Write the dataframe in append mode to avoid delete previous data
     df.to_sql(tableName, engine, if_exists='append', index=True)
 
 
@@ -153,6 +155,8 @@ def InsertingData(df, tableName, engine):
 
 
 def ReadingData(cursor, tableName):
+    #Reading 10 rows'
+    print('Final insert review')
     cursor.execute('select * from {} limit 10;'.format(tableName))
     for i in cursor.fetchall():
         print(i)
@@ -170,40 +174,53 @@ def InsertInPostgresql(df,User, Password, Host, Database, Port, tableName):
         database=Database,
         user=User, 
         password=Password, 
-        host=Host, 
-        port= Port
+        host=Host
     )
   
     conn.autocommit = True
     cursor = conn.cursor()
     
+    #Principal function to create the table if it isn't exist
     CreatingTable(tableName, cursor)
     
+    #Principal function to insert the dataframe in the table
     InsertingData(df, tableName, engine)
     
+    #Function to read the data from postgresql table
     ReadingData(cursor, tableName)
+    
+    conn.close()
 
 
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[14]:
+# In[22]:
 
 
 #Main function
 if __name__ == "__main__":
+    
+    #Main variables 
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--User", required= True, help= "User in postgresql Database")
+    ap.add_argument("--Pass", required= True, help= "User's Password")
+    ap.add_argument("--Host", required= True, help= "Principal host")
+    ap.add_argument("--Db", required= True, help= "Database sink")
+    ap.add_argument("--Port", required= True, help= "Port")
+    ap.add_argument("--Table", required= True, help= "Table name")
+    
+    args = vars(ap.parse_args())
+    
+    User = args['User']
+    Password=args['Pass']
+    Host=args['Host']
+    Database=args['Db']
+    Port=int(args['Port'])
+    TableName=args['Table']
+
     df = ExtractAndTransform()
     try:
-        InsertInPostgresql(df,'postgres', 'root', 'localhost', 'NicaSource', 5434 ,'carsales')
+        InsertInPostgresql(df,User, Password, Host, Database, Port ,TableName)
     except Exception as e: 
         print('Error: {}'.format(e))
+
+    
 
