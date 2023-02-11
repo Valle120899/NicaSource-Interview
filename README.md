@@ -4,13 +4,19 @@
 
 
 All this part is about how to execute the program and explaining how it works
-#### steps:
+#### Summary:
 - libraries to import
 - Command line interface
 - General explanation
 - Steps I followed to create the code
 - Conclusion
  
+The github contains:
+- [jupyter notebook](https://github.com/Valle120899/NicaSource-Interview/blob/main/DataPipeline.ipynb) 
+- [Python code](https://github.com/Valle120899/NicaSource-Interview/blob/main/DataPipeline.py)
+- A folder with some [photos](https://github.com/Valle120899/NicaSource-Interview/tree/main/photos)
+- The provides [dataset](https://github.com/Valle120899/NicaSource-Interview/blob/main/dataset.csv)
+
 
 ## Libraries to import
 First of all you have to install python [here](https://www.python.org/ftp/python/3.11.2/python-3.11.2-amd64.exe), follow the GUI
